@@ -1,0 +1,15 @@
+[package]
+name = "transfer_core"
+version = "0.1.0"
+edition = "2021"
+description = "Shared Rust core for the local file transfer application"
+license = "MIT"
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+mdns-sd = "0.22"
+flutter_rust_bridge = "=2.13.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
