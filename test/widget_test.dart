@@ -9,12 +9,12 @@ void main() {
   ) async {
     await tester.pumpWidget(const TransferApp());
 
-    expect(find.text('Transfer'), findsOneWidget);
+    expect(find.text('Uqzela'), findsOneWidget);
     expect(find.text('Yakındaki cihazlar'), findsOneWidget);
-    expect(find.text('Cihaz bulunamadı'), findsOneWidget);
+    expect(find.text('Henüz cihaz yok'), findsOneWidget);
     expect(find.text('Örnek telefon'), findsNothing);
     expect(find.text('Çalışma bilgisayarı'), findsNothing);
-    expect(find.text('Eşleştirme isteği gönder'), findsOneWidget);
+    expect(find.text('Güvenli bağlantı başlat'), findsOneWidget);
   });
 
   testWidgets('Cihaz seçilmeden eşleştirme başlatılamaz', (
@@ -23,7 +23,7 @@ void main() {
     await tester.pumpWidget(const TransferApp());
 
     final pairingButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Eşleştirme isteği gönder'),
+      find.widgetWithText(FilledButton, 'Güvenli bağlantı başlat'),
     );
 
     expect(pairingButton.onPressed, isNull);

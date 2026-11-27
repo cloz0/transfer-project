@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -2096018149;
+  int get rustContentHash => 173593397;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -87,7 +87,12 @@ abstract class RustLibApi extends BaseApi {
 
   Future<String> crateApiProtocolVersion();
 
-  Future<void> crateApiSendPairingRequest({
+  Future<void> crateApiRespondToPairingRequest({
+    required String requestId,
+    required bool accepted,
+  });
+
+  Future<String> crateApiSendPairingRequest({
     required String address,
     required int port,
     required String deviceId,
@@ -198,7 +203,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "protocol_version", argNames: []);
 
   @override
-  Future<void> crateApiSendPairingRequest({
+  Future<void> crateApiRespondToPairingRequest({
+    required String requestId,
+    required bool accepted,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(requestId, serializer);
+          sse_encode_bool(accepted, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiRespondToPairingRequestConstMeta,
+        argValues: [requestId, accepted],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiRespondToPairingRequestConstMeta =>
+      const TaskConstMeta(
+        debugName: "respond_to_pairing_request",
+        argNames: ["requestId", "accepted"],
+      );
+
+  @override
+  Future<String> crateApiSendPairingRequest({
     required String address,
     required int port,
     required String deviceId,
@@ -215,12 +255,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
+          decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_String,
         ),
         constMeta: kCrateApiSendPairingRequestConstMeta,
@@ -251,7 +291,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 6,
             port: port_,
           );
         },
@@ -280,7 +320,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },
@@ -305,6 +345,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
+  }
+
+  @protected
   DiscoveredDevice dco_decode_discovered_device(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -324,14 +370,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   IncomingPairingRequest dco_decode_incoming_pairing_request(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 5)
-      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
     return IncomingPairingRequest(
       requestId: dco_decode_String(arr[0]),
       deviceId: dco_decode_String(arr[1]),
       deviceName: dco_decode_String(arr[2]),
       protocolVersion: dco_decode_String(arr[3]),
       address: dco_decode_String(arr[4]),
+      securityCode: dco_decode_String(arr[5]),
     );
   }
 
@@ -389,6 +436,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   DiscoveredDevice sse_decode_discovered_device(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
@@ -417,12 +470,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_deviceName = sse_decode_String(deserializer);
     var var_protocolVersion = sse_decode_String(deserializer);
     var var_address = sse_decode_String(deserializer);
+    var var_securityCode = sse_decode_String(deserializer);
     return IncomingPairingRequest(
       requestId: var_requestId,
       deviceId: var_deviceId,
       deviceName: var_deviceName,
       protocolVersion: var_protocolVersion,
       address: var_address,
+      securityCode: var_securityCode,
     );
   }
 
@@ -491,15 +546,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
   }
 
   @protected
@@ -527,6 +582,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.deviceName, serializer);
     sse_encode_String(self.protocolVersion, serializer);
     sse_encode_String(self.address, serializer);
+    sse_encode_String(self.securityCode, serializer);
   }
 
   @protected
@@ -590,11 +646,5 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }

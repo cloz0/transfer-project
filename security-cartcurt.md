@@ -1,20 +1,21 @@
 # Güvenlik notu
 
-Transfer şu anda geliştirme aşamasında bir prototiptir; güvenli dosya aktarımı olarak kullanılmaya hazır değildir.
+Uqzela'nın mevcut sürümünde güvenlik kapsamı yalnızca eşleştirme oturumu ile sınırlıdır.
+
+## Uygulananlar
+
+- Eşleştirme iletişiminde Noise XX protokolü kullanılır.
+- Oturum trafiği ChaChaPoly ile şifrelenir.
+- Ağ mesajlarında boyut sınırı ve zaman aşımı uygulanır.
+- Kabul veya ret kararı şifreli oturum üzerinden gönderilir.
+- Güvenlik kodu iki cihazda karşılaştırılabilir.
 
 ## Mevcut sınırlar
 
-- Dosya aktarımı ve şifreleme uygulanmamıştır.
-- Cihaz keşfi, karşı cihazın kimliğini doğrulamaz.
-- Eşleştirme isteği yerel ağ üzerinden kimlik doğrulaması ve şifreleme olmadan iletilir.
-- Gelen isteklerin kabul veya reddi şu an karşı cihaza bildirilmez ve dosyalara erişim sağlamaz.
-- Yerel ağdaki bir cihaz sahte isteklerle kullanıcıya tekrarlayan pencereler gösterebilir veya uygulamanın yanıt vermesini zorlaştırabilir.
+- Dosya aktarımı henüz uygulanmamıştır.
+- Kalıcı cihaz kimliği ve güvenilir cihaz kaydı yoktur.
+- Güvenlik kodu kullanıcı tarafından kontrol edilmelidir; uygulama bunu otomatik doğrulamaz.
+- mDNS keşfi tek başına cihaz kimliği doğrulamaz.
+- Okul, şirket veya misafir ağları cihazlar arası bağlantıyı engelleyebilir.
 
-## Güvenli kullanım
-
-- Uygulamayı yalnızca güvendiğiniz, kontrollü bir ağda çalıştırın.
-- Hassas dosyalar, kişisel veriler veya güvenilmeyen ağlar için kullanmayın.
-- Tanımadığınız cihazlardan gelen istekleri onaylamayın.
-- Güvenli aktarım, kimlik doğrulama ve istek sınırlama uygulanıp ayrıca incelenene kadar bu sınırların devam ettiğini varsayın.
-
-Bu not mevcut davranışı açıklar; güvenlik sertifikası veya güvenli kullanım garantisi değildir.
+Bu nedenle uygulamayı yalnızca güvendiğiniz yerel ağlarda kullanın ve güvenlik kodu eşleşmeyen bir isteği kabul etmeyin.

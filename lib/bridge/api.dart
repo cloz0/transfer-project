@@ -7,9 +7,9 @@ import 'frb_generated.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `local_service_slot`
-// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `LocalService`, `PairingRequestWire`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`, `fmt`
+// These functions are ignored because they are not marked as `pub`: `is_private_ipv4`, `local_service_slot`, `read_frame`, `security_code`, `write_bytes`, `write_frame`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `LocalService`, `PairingDecisionWire`, `PairingHandshakeWire`, `PairingRequestWire`, `PendingPairing`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// Returns the discovery protocol version used by the Rust core.
 Future<String> protocolVersion() =>
@@ -36,7 +36,7 @@ Future<void> stopLocalService() =>
 ///
 /// This is only the request transport. It does not authorize a device or
 /// exchange files; the receiver must still display and approve the request.
-Future<void> sendPairingRequest({
+Future<String> sendPairingRequest({
   required String address,
   required int port,
   required String deviceId,
@@ -46,6 +46,15 @@ Future<void> sendPairingRequest({
   port: port,
   deviceId: deviceId,
   deviceName: deviceName,
+);
+
+/// Accepts or rejects a pending request through its encrypted Noise channel.
+Future<void> respondToPairingRequest({
+  required String requestId,
+  required bool accepted,
+}) => RustLib.instance.api.crateApiRespondToPairingRequest(
+  requestId: requestId,
+  accepted: accepted,
 );
 
 /// Returns pending pairing requests without accepting them automatically.
@@ -104,6 +113,7 @@ class IncomingPairingRequest {
   final String deviceName;
   final String protocolVersion;
   final String address;
+  final String securityCode;
 
   const IncomingPairingRequest({
     required this.requestId,
@@ -111,6 +121,7 @@ class IncomingPairingRequest {
     required this.deviceName,
     required this.protocolVersion,
     required this.address,
+    required this.securityCode,
   });
 
   @override
@@ -119,7 +130,8 @@ class IncomingPairingRequest {
       deviceId.hashCode ^
       deviceName.hashCode ^
       protocolVersion.hashCode ^
-      address.hashCode;
+      address.hashCode ^
+      securityCode.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -130,5 +142,6 @@ class IncomingPairingRequest {
           deviceId == other.deviceId &&
           deviceName == other.deviceName &&
           protocolVersion == other.protocolVersion &&
-          address == other.address;
+          address == other.address &&
+          securityCode == other.securityCode;
 }

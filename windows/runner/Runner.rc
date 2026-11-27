@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.transferproject" "\0"
-            VALUE "FileDescription", "transfer_app" "\0"
+            VALUE "FileDescription", "Uqzela" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "transfer_app" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 dev.transferproject. All rights reserved." "\0"
             VALUE "OriginalFilename", "transfer_app.exe" "\0"
-            VALUE "ProductName", "transfer_app" "\0"
+            VALUE "ProductName", "Uqzela" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

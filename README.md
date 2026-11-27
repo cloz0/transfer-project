@@ -1,36 +1,112 @@
-# Transfer
+# UQZELA
 
-Transfer, aynı yerel ağdaki cihazları keşfetmek ve eşleştirme isteği göndermek için geliştirilen Flutter ve Rust tabanlı bir uygulama prototipidir.
+Uqzela, aynı yerel ağdaki cihazları bulup güvenli bir eşleştirme bağlantısı kurmak için geliştirilen Flutter ve Rust tabanlı bir uygulamadır.
 
-## Mevcut durum
+## Mevcut özellikler
 
-- Aynı yerel ağdaki Transfer cihazları mDNS ile keşfedilir.
-- Kullanıcı seçtiği cihaza eşleştirme isteği gönderebilir.
-- Gelen istek uygulama arayüzünde kabul veya reddedilebilir; bu karar şu an karşı cihaza iletilmez.
+- Aynı yerel ağdaki Uqzela cihazlarını mDNS ile keşfetme
+- Android ve Linux üzerinde cihazları listeleme
+- Seçilen cihaza eşleştirme isteği gönderme
+- Gelen eşleştirme isteğini kabul etme veya reddetme
+- Noise XX protokolüyle şifreli eşleştirme oturumu
+- İki tarafta karşılaştırılabilen güvenlik kodu
+- Koyu temalı, responsive Flutter arayüzü
+- Yenileme, bağlantı ve eşleştirme durumları için animasyonlar
 
-Bu sürümde dosya aktarımı, güvenli kanal, şifreleme ve cihaz kimliğini doğrulama **uygulanmamıştır**. Eşleştirme adımları bir prototip akışıdır; ekrandaki onay, karşı cihazın kimliğini doğrulamaz. İstek ve keşif bilgileri yerel ağ üzerinden şifrelenmeden iletilir. Yerel ağdaki başka bir cihaz sahte eşleştirme istekleri göndererek uygulamada rahatsız edici pencereler açılmasına veya uygulamanın yanıt vermesinin zorlaşmasına neden olabilir. Bu nedenle uygulamayı güvenilmeyen ağlarda çalıştırmayın ve hassas bilgiler için kullanmayın.
+Dosya seçme ve dosya aktarımı henüz uygulanmamıştır.
 
-Güvenlik kapsamı ve bu prototipin bilinen sınırları için [security-cartcurt.md](./security-cartcurt.md) dosyasına bakın.
+## Güvenlik durumu
+
+Eşleştirme sırasında Noise XX kullanılarak şifreli bir oturum kurulmaya çalışılır. Kullanıcılar, bağlantıyı kabul etmeden önce iki cihazda gösterilen güvenlik kodunu karşılaştırmalıdır.
+
+Bu sürümde kalıcı cihaz kimliği, güvenilir cihaz listesi ve dosya aktarımı bulunmaz. Uygulamayı yalnızca güvendiğiniz yerel ağlarda kullanın.
+
+Ayrıntılar için [security-cartcurt.md](./security-cartcurt.md) dosyasına bakın.
 
 ## Gereksinimler
 
-- Flutter SDK ve Dart SDK (Dart `^3.14.0`)
+- Flutter SDK ve Dart SDK (`^3.14.0`)
 - Rust `1.100.0` toolchain
-- Hedef platform için gerekli Flutter derleme araçları
+- Hedef platform için Flutter derleme araçları
 
-Depoda bulunan `native/transfer_core/rust-toolchain.toml`, gereken Rust toolchain sürümünü belirtir. Rustup kullanıyorsanız eksik toolchain otomatik olarak kurulabilir.
+## Nasıl çalışır?
 
-## Başlatma
+1. Uygulama açılırken cihaz yerel ağda mDNS üzerinden yayınlanır.
+2. Uygulama aynı ağdaki diğer Uqzela cihazlarını tarar.
+3. Listeden bir cihaz seçilip eşleştirme isteği gönderilir.
+4. Karşı cihaz isteği kabul eder veya reddeder.
+5. Kabul öncesinde iki cihazdaki güvenlik kodu karşılaştırılır.
+6. Kabul edilirse şifreli eşleştirme oturumu tamamlanır.
+
+İletişim için sabit TCP portu `39871` kullanılır. Okul, şirket veya misafir ağları cihazlar arası bağlantıyı ya da mDNS trafiğini engelleyebilir.
+
+## Geliştirme ortamında çalıştırma
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-Uygulamayı kullanırken cihazların aynı yerel ağa bağlı ve Transfer'ın her iki cihazda da açık olması gerekir. Cihaz keşfi, ağın mDNS trafiğine izin vermesine bağlıdır.
+Bağlı cihazları görmek için:
+
+```bash
+flutter devices
+```
+
+Linux masaüstünde çalıştırmak için:
+
+```bash
+flutter run -d linux
+```
+
+## APK oluşturma
+
+Telefona yüklenebilir release APK oluşturmak için:
+
+```bash
+flutter build apk --release
+```
+
+APK şu klasöre oluşturulur:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+Geliştirme/debug APK’sı için:
+
+```bash
+flutter build apk --debug
+```
+
+Debug APK’nın konumu:
+
+```text
+build/app/outputs/flutter-apk/app-debug.apk
+```
+
+## Linux uygulaması oluşturma
+
+```bash
+flutter build linux --debug
+```
+
+Linux uygulaması şu klasöre oluşturulur:
+
+```text
+build/linux/x64/debug/bundle/transfer_app
+```
+
+Uygulamayı çalıştırmak için:
+
+```bash
+build/linux/x64/debug/bundle/transfer_app
+```
+
+Linux derlemesi için `cmake` ve `ninja` araçlarının kurulu olması gerekir.
 
 ## Teknoloji
 
-- Flutter / Dart: uygulama arayüzü
-- Rust: yerel ağ keşfi ve eşleştirme isteği prototipi
+- Flutter / Dart: arayüz
+- Rust: yerel ağ keşfi ve güvenli eşleştirme protokolü
 - `flutter_rust_bridge`: Flutter ile Rust arasındaki köprü
